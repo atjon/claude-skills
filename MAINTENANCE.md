@@ -38,6 +38,15 @@ This repo lives at `~/claude-skills` and mirrors every skill on the machine.
 3. Run `sync-skills.sh` — it removes repo copies that are no longer in the
    manifest, commits, and pushes.
 
+## What counts as a skill for this repo
+
+Only skills that exist as files on this machine: `~/.claude/skills/<name>/` and
+`<project>/.claude/skills/<name>/`. Claude Code's **built-in** skills (dataviz,
+loop, run, init, review, etc.) ship inside the app, appear in every project
+automatically, and must NOT be added to the manifest — Anthropic maintains
+those. Same for skills installed from plugin marketplaces: they're managed by
+the plugin system, not this repo.
+
 ## Constraints (do not violate)
 
 - **The manifest is the source of truth.** Never hand-copy files into `skills/`;
