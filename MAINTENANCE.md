@@ -38,6 +38,22 @@ This repo lives at `~/claude-skills` and mirrors every skill on the machine.
 3. Run `sync-skills.sh` — it removes repo copies that are no longer in the
    manifest, commits, and pushes.
 
+## Proactive skill creation
+
+The user has a standing request (2026-07-18): when they ask for something
+recurring — the same request more than once, or an obviously repeatable
+task/question — do the task, then create a skill for it automatically:
+
+1. Check `manifest.tsv` first; if a skill already covers it, use or improve
+   that one instead of duplicating.
+2. Otherwise create the skill, register it, and sync in the same session
+   (normal workflow above).
+3. Tell the user which skill was created and why, so they can veto it.
+
+Detection is judgment-based, not automated: notice repetition within a session,
+and record recurring request patterns in the project's Claude memory directory
+so future sessions can spot the second occurrence.
+
 ## What counts as a skill for this repo
 
 Only skills that exist as files on this machine: `~/.claude/skills/<name>/` and
