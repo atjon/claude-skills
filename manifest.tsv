@@ -1,3 +1,4 @@
 # manifest.tsv — source of truth for which skills are tracked.
 # Format (TAB-separated): skill-name	category	source-path
 # Paths may use ~ for the home directory. See MAINTENANCE.md.
+profile-yolo26	profiling	~/Documents/tr-autonomy-comp-2026/.claude/skills/profile-yolo26

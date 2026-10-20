@@ -34,7 +34,7 @@ is added or removed:
 
 | Category | Purpose |
 |----------|---------|
-| _(none yet)_ | The repo starts empty; categories appear as skills are created. |
+| `profiling` | Measuring and diagnosing performance (latency, flame graphs, Nsight). |
 
 Examples of reasonable future categories: `coding`, `learning`, `git-workflow`,
 `automation`, `writing`, `system-admin`.
