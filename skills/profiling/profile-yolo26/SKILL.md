@@ -5,7 +5,7 @@ description: Profile the tr-yolo-26 helper_subscriber node with Nsight Systems N
 
 # Profile yolo26 (NVTX + Nsight Systems)
 
-Everything is in `src/tr-yolo-26/tools/`:
+Everything is in `src/tr-yolo-26/tools/`; the full user guide is `tools/PROFILING.md`:
 
 - `profile.sh` -- rebuild (RelWithDebInfo) -> `ros2 bag play --loop` -> `nsys profile` of the
   helper_subscriber binary -> `nvtx_flame.py`. Run `profile.sh -h` for flags.
@@ -27,6 +27,11 @@ Compare against a specific older run: `nvtx_flame.py profiles/after.nsys-rep --b
 
 ## Gotchas
 
+- Noise (measured 2026-10-20): `inference` is within 2% between identical runs, but the CPU stages
+  (Preprocess/postprocess/publisher/publishing_detections) swing up to 2x. Use 3 runs a side for
+  CPU-stage changes. CPU pinning and fixing the glibc mmap threshold did NOT help (the latter hurt).
+- TensorRT emits per-layer NVTX ranges under `yolo26::inference` (CPU enqueue only, ~0.1 ms);
+  table depth defaults to 2, `-d 3` shows them.
 - Only compare runs captured with the same flags: `-c` (CUDA trace) adds overhead.
 - `-s` (CPU backtrace sampling, function-level flame via NVIDIA's stackcollapse_nsys.py) needs
   `sudo sysctl kernel.perf_event_paranoid=2`.
