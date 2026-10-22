@@ -44,7 +44,7 @@ Compare against a specific older run: `nvtx_flame.py profiles/after.nsys-rep --b
 - Only compare runs captured with the same flags: `-c` (CUDA trace) adds overhead.
 - `-s` needs `sudo sysctl kernel.perf_event_paranoid=2` (this desktop sits at 4). NVIDIA's
   stackcollapse_nsys.py is NOT used: it keeps one stack per leaf function.
-- `-f` overhead measured 2026-10-22: within run-to-run noise (~15 instrumented calls/frame). If a
+- `-f` overhead measured 2026-10-22: within run-to-run noise (~15 instrumented calls/frame; 2 of 3 runs matched plain). The option is cached: after `-f`, a plain `colcon build` stays instrumented until rebuilt with `=OFF`. If a
   hot-loop helper shows a huge `n`, exclude it (`__attribute__((no_instrument_function))` or
   `-DTR_YOLO_26_INSTRUMENT_EXCLUDE_FUNCTIONS=a,b`).
 - CUDA error 999 at TRT startup (even outside nsys) = broken driver state, usually after suspend;
