@@ -20,7 +20,7 @@ Outputs go to `src/tr-yolo-26/profiles/` (gitignored); `latest_summary.csv` is t
 1. `src/tr-yolo-26/tools/profile.sh -l before` (baseline)
 2. edit code / move nvtxRangePush/Pop
 3. `src/tr-yolo-26/tools/profile.sh -l after` -> table shows Δmed per range vs `before`
-4. flame graph: load `profiles/after.folded` in https://www.speedscope.app (Left Heavy view)
+4. flame graph: load `profiles/after.speedscope.json` (seconds; `.folded` is integer us) in https://www.speedscope.app (Left Heavy view)
 5. timeline detail: `nsys-ui profiles/after.nsys-rep`
 
 Compare against a specific older run: `nvtx_flame.py profiles/after.nsys-rep --baseline profiles/before_summary.csv`.
