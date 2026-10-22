@@ -1,9 +1,9 @@
 ---
 name: profile-yolo26
-description: Profile the tr-yolo-26 helper_subscriber node with Nsight Systems NVTX ranges -- one command that rebuilds, plays a rosbag, captures, and prints a per-range latency table diffed against the last run plus a flame graph. Use when asked to profile/benchmark yolo26, check whether a change made a yolo26 stage faster, or produce a yolo26 flame graph.
+description: Profile the tr-yolo-26 helper_subscriber node with Nsight Systems -- one command that rebuilds, plays a rosbag, captures, and prints a per-range latency table diffed against the last run plus a flame graph. Event-based (exact NVTX ranges, -f = every function auto-instrumented) and sampling-based (-s = CPU call-stack samples of all code). Use when asked to profile/benchmark yolo26, check whether a change made a yolo26 stage faster, or produce a yolo26 flame graph.
 ---
 
-# Profile yolo26 (NVTX + Nsight Systems)
+# Profile yolo26 (Nsight Systems: event-based NVTX + sampling)
 
 Everything is in `src/tr-yolo-26/tools/`; the full user guide is `tools/PROFILING.md`:
 
@@ -13,7 +13,16 @@ Everything is in `src/tr-yolo-26/tools/`; the full user guide is `tools/PROFILIN
   ranges (from `nsys stats --report nvtx_pushpop_trace`) into `<run>.folded` weighted by self time,
   writes `<run>_summary.csv`, prints median/p95 per range and the delta vs baseline.
 
-Outputs go to `src/tr-yolo-26/profiles/` (gitignored); `latest_summary.csv` is the rolling baseline.
+- `-f` -- rebuild with `-DTR_YOLO_26_INSTRUMENT_FUNCTIONS=ON`: GCC `-finstrument-functions` +
+  `src/func_trace.cpp` hooks push/pop an NVTX range per function defined in this package (exact,
+  event-based; no nvtxRangePushA needed). nvtx_flame.py re-roots stacks at `yolo26::image_cb` and
+  addr2line-resolves `<module>+0x<off>` names. Plain runs pass `=OFF` explicitly (cache is sticky).
+- `-s` -- CPU sampling (`--sample=process-tree --backtrace=dwarf`, `-B` to change) ->
+  `cpu_flame.py` reads SAMPLING_CALLCHAINS from the sqlite export -> `<run>_cpu.speedscope.json`
+  (rooted per thread, weights = samples) + self/total hotspot table. Statistical, CPU time only.
+
+Outputs go to `src/tr-yolo-26/profiles/` (gitignored); `latest_summary.csv` is the rolling baseline
+(`latest_summary_funcs.csv` for `-f` runs -- they never diff against plain runs).
 
 ## Workflow
 
@@ -33,8 +42,11 @@ Compare against a specific older run: `nvtx_flame.py profiles/after.nsys-rep --b
 - TensorRT emits per-layer NVTX ranges under `yolo26::inference` (CPU enqueue only, ~0.1 ms);
   table depth defaults to 2, `-d 3` shows them.
 - Only compare runs captured with the same flags: `-c` (CUDA trace) adds overhead.
-- `-s` (CPU backtrace sampling, function-level flame via NVIDIA's stackcollapse_nsys.py) needs
-  `sudo sysctl kernel.perf_event_paranoid=2`.
+- `-s` needs `sudo sysctl kernel.perf_event_paranoid=2` (this desktop sits at 4). NVIDIA's
+  stackcollapse_nsys.py is NOT used: it keeps one stack per leaf function.
+- `-f` overhead measured 2026-10-22: within run-to-run noise (~15 instrumented calls/frame). If a
+  hot-loop helper shows a huge `n`, exclude it (`__attribute__((no_instrument_function))` or
+  `-DTR_YOLO_26_INSTRUMENT_EXCLUDE_FUNCTIONS=a,b`).
 - CUDA error 999 at TRT startup (even outside nsys) = broken driver state, usually after suspend;
   `sudo rmmod nvidia_uvm && sudo modprobe nvidia_uvm` or reboot.
 - Range names from `NVTX_RANGE_FRAME_SRC` carry ` src=.. ts=..`; the folder strips it. New ranges
